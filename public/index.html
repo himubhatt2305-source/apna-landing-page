@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apna - Find Your Dream Job</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .modal-transition { transition: opacity 0.3s ease-out, transform 0.3s ease-out; }
+        .page-transition { transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans antialiased min-h-screen relative flex flex-col justify-between">
+
+    <div id="location-modal-overlay" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div id="location-modal-card" class="modal-transition bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden p-6 text-center space-y-5">
+            <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto text-blue-600">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+            </div>
+            <div>
+                <h3 class="text-xl font-bold text-gray-900 px-2">Allow "Apna" to access your location?</h3>
+                <p class="text-xs text-gray-500 mt-2 leading-relaxed px-4">This app requires location permission to scan and match high-paying jobs near your immediate residential area.</p>
+            </div>
+            <div class="pt-2 flex flex-col gap-2">
+                <button id="btn-allow-always" type="button" class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl transition shadow-md">Allow while using the app</button>
+                <button id="btn-allow-once" type="button" class="w-full py-3.5 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium text-sm rounded-xl transition">Only this time</button>
+                <button id="btn-deny" type="button" class="w-full py-2.5 text-gray-400 hover:text-gray-600 font-medium text-sm rounded-xl transition">Don't Allow</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="form-screen" class="page-transition w-full max-w-xl mx-auto px-4 py-8 sm:px-6">
+        <header class="text-center mb-8">
+            <div class="mb-2"><span class="text-3xl font-black text-blue-600 tracking-tight">apna</span></div>
+            <h2 class="text-2xl font-bold text-gray-900 sm:text-3xl">Find your dream job</h2>
+            <p class="text-gray-500 text-sm mt-1">Fill the form to match nearby requirements</p>
+        </header>
+
+        <main class="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 sm:p-8">
+            <form id="registration-form" class="space-y-4" novalidate>
+                <input type="hidden" id="latitude">
+                <input type="hidden" id="longitude">
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Full Name</label>
+                    <input type="text" id="fullName" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="e.g. Himanshu Bhatt">
+                    <span class="error-msg text-xs text-red-500 mt-1 hidden">Please enter your full name.</span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Mobile Number</label>
+                        <input type="tel" id="mobile" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="10-digit number">
+                        <span class="error-msg text-xs text-red-500 mt-1 hidden">Enter a valid 10-digit number.</span>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Email Address</label>
+                        <input type="email" id="email" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="name@example.com">
+                        <span class="error-msg text-xs text-red-500 mt-1 hidden">Enter a valid email address.</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">City</label>
+                        <input type="text" id="city" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="e.g. Delhi">
+                        <span class="error-msg text-xs text-red-500 mt-1 hidden">City field cannot be empty.</span>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Pincode</label>
+                        <input type="text" id="pincode" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="6 digits">
+                        <span class="error-msg text-xs text-red-500 mt-1 hidden">Enter a numeric pincode (min 4 digits).</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="relative">
+                        <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Job Role / Desired Job</label>
+                        <input type="text" id="jobRoleInput" autocomplete="off" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="Type or select job...">
+                        <div id="suggestion-box" class="hidden absolute left-0 right-0 mt-1 max-h-48 overflow-y-auto bg-white border border-gray-200 rounded-xl shadow-lg z-10 text-sm text-gray-800"></div>
+                        <span class="error-msg text-xs text-red-500 mt-1 hidden">Please select or type a job role.</span>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Qualification</label>
+                        <select id="qualification" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl bg-white text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">Select education...</option>
+                            <option value="10th">10th or Below</option>
+                            <option value="12th">12th Pass</option>
+                            <option value="diploma">Diploma</option>
+                            <option value="bca">BCA / Computer Applications</option>
+                            <option value="graduate">Graduate</option>
+                        </select>
+                        <span class="error-msg text-xs text-red-500 mt-1 hidden">Select your qualification.</span>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Upload Resume (PDF/DOC)</label>
+                    <input type="file" id="resume" accept=".pdf,.doc,.docx" class="w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
+                    <span class="error-msg text-xs text-red-500 mt-1 hidden">Please upload a valid document format (.pdf/.doc/.docx).</span>
+                </div>
+
+                <button type="submit" id="submit-btn" class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition shadow-lg mt-2 flex items-center justify-center">
+                    <span id="btn-text">Continue</span>
+                </button>
+            </form>
+        </main>
+    </div>
+
+    <div id="success-screen" class="page-transition hidden opacity-0 scale-95 w-full max-w-md mx-auto px-4 py-16 text-center flex-grow flex flex-col justify-center items-center">
+        <div class="bg-white rounded-3xl shadow-2xl border border-gray-100 p-8 w-full space-y-6">
+            <div class="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto text-emerald-500 shadow-inner">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <div class="space-y-2">
+                <h2 class="text-2xl font-black text-gray-900 tracking-tight">Application Submitted!</h2>
+                <p class="text-sm font-medium text-emerald-600 bg-emerald-50 inline-block px-3 py-1 rounded-full">Profile Verified Successfully</p>
+            </div>
+            <hr class="border-gray-100">
+            <p class="text-gray-600 text-sm leading-relaxed px-2">
+                Thank you for registering on Apna. We have safely captured your matching preferences.
+                <span class="block mt-3 font-semibold text-gray-800">We will provide you further job updates directly on your Gmail and WhatsApp number shortly.</span>
+            </p>
+            <div class="pt-2">
+                <button onclick="window.location.reload();" class="w-full py-3 bg-gray-900 hover:bg-black text-white font-medium text-sm rounded-xl transition shadow-lg">Go to Homepage</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center text-xs text-gray-400 py-6">&copy; 2026 Apna Portal.</footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const overlay = document.getElementById('location-modal-overlay');
+            const card = document.getElementById('location-modal-card');
+            const btnAlways = document.getElementById('btn-allow-always');
+            const btnOnce = document.getElementById('btn-allow-once');
+            const btnDeny = document.getElementById('btn-deny');
+            const latInp = document.getElementById('latitude');
+            const lngInp = document.getElementById('longitude');
+            const form = document.getElementById('registration-form');
+            const formScreen = document.getElementById('form-screen');
+            const successScreen = document.getElementById('success-screen');
+            const submitBtn = document.getElementById('submit-btn');
+            const btnText = document.getElementById('btn-text');
+
+            const jobRolesList = ["Receptionist", "Ground Staff", "Hotel HR Executive", "Sales Executive", "Telecaller / BPO", "Customer Support Executive", "Web Developer", "Software Engineer", "Data Entry Operator", "Office Assistant"];
+            const roleInput = document.getElementById('jobRoleInput');
+            const suggestionBox = document.getElementById('suggestion-box');
+
+            function showSuggestions(filterText = '') {
+                suggestionBox.innerHTML = '';
+                const filtered = jobRolesList.filter(role => role.toLowerCase().includes(filterText.toLowerCase()));
+                if (filtered.length === 0) { suggestionBox.classList.add('hidden'); return; }
+                filtered.forEach(role => {
+                    const div = document.createElement('div'); div.textContent = role; div.className = "px-4 py-2.5 hover:bg-blue-50 cursor-pointer transition-colors";
+                    div.addEventListener('click', () => { roleInput.value = role; suggestionBox.classList.add('hidden'); });
+                    suggestionBox.appendChild(div);
+                });
+                suggestionBox.classList.remove('hidden');
+            }
+            roleInput.addEventListener('focus', () => showSuggestions(roleInput.value));
+            roleInput.addEventListener('keyup', () => showSuggestions(roleInput.value));
+            document.addEventListener('click', (e) => { if (e.target !== roleInput && e.target !== suggestionBox) suggestionBox.classList.add('hidden'); });
+
+            function requestBrowserLocation() {
+                if (!navigator.geolocation) { alert("Geolocation not supported."); return; }
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => { latInp.value = pos.coords.latitude; lngInp.value = pos.coords.longitude; card.style.transform = 'scale(0.9)'; overlay.style.opacity = '0'; setTimeout(() => overlay.classList.add('hidden'), 300); },
+                    () => { shakeModalCard(); }
+                );
+            }
+            function shakeModalCard() {
+                card.style.transform = 'translateX(-10px)';
+                setTimeout(() => card.style.transform = 'translateX(10px)', 70);
+                setTimeout(() => card.style.transform = 'translateX(-10px)', 140);
+                setTimeout(() => card.style.transform = 'translateX(0)', 210);
+            }
+            btnAlways.addEventListener('click', requestBrowserLocation);
+            btnOnce.addEventListener('click', requestBrowserLocation);
+            btnDeny.addEventListener('click', shakeModalCard);
+
+            function toggleError(inputElement, show) {
+                const parent = inputElement.closest('div'); const errMsg = parent.querySelector('.error-msg');
+                if (show) { inputElement.classList.add('border-red-500', 'focus:ring-red-400'); if (errMsg) errMsg.classList.remove('hidden'); }
+                else { inputElement.classList.remove('border-red-500', 'focus:ring-red-400'); if (errMsg) errMsg.classList.add('hidden'); }
+            }
+
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                let isValid = true;
+
+                const name = document.getElementById('fullName'); if (!name.value.trim()) { toggleError(name, true); isValid = false; } else { toggleError(name, false); }
+                const mobile = document.getElementById('mobile'); if (!/^[0-9]{10}$/.test(mobile.value.trim())) { toggleError(mobile, true); isValid = false; } else { toggleError(mobile, false); }
+                const email = document.getElementById('email'); if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) { toggleError(email, true); isValid = false; } else { toggleError(email, false); }
+                const city = document.getElementById('city'); if (!city.value.trim()) { toggleError(city, true); isValid = false; } else { toggleError(city, false); }
+                const pincode = document.getElementById('pincode'); if (!/^[0-9]+$/.test(pincode.value.trim()) || pincode.value.trim().length < 4) { toggleError(pincode, true); isValid = false; } else { toggleError(pincode, false); }
+                if (!roleInput.value.trim()) { toggleError(roleInput, true); isValid = false; } else { toggleError(roleInput, false); }
+                const qual = document.getElementById('qualification'); if (!qual.value) { toggleError(qual, true); isValid = false; } else { toggleError(qual, false); }
+                const resume = document.getElementById('resume'); if (resume.files.length === 0) { toggleError(resume, true); isValid = false; } else { toggleError(resume, false); }
+
+                if (isValid) {
+                    if(!latInp.value || !lngInp.value) { alert("Please allow location permission first!"); return; }
+
+                    btnText.textContent = "Submitting to MongoDB...";
+                    submitBtn.disabled = true;
+
+                    const payload = {
+                        fullName: name.value.trim(),
+                        mobileNumber: mobile.value.trim(),
+                        email: email.value.trim(),
+                        city: city.value.trim(),
+                        pincode: pincode.value.trim(),
+                        jobRole: roleInput.value.trim(),
+                        qualification: qual.value,
+                        resumeName: resume.files[0].name,
+                        latitude: latInp.value,
+                        longitude: lngInp.value
+                    };
+
+                    // Relative route for monolith deployment
+                    fetch("/api/register", {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if(data.success) {
+                            formScreen.style.opacity = '0';
+                            formScreen.style.transform = 'translateY(-10px)';
+                            setTimeout(() => {
+                                formScreen.classList.add('hidden');
+                                successScreen.classList.remove('hidden');
+                                setTimeout(() => { successScreen.classList.remove('opacity-0', 'scale-95'); successScreen.classList.add('opacity-100', 'scale-100'); }, 5);
+                            }, 400);
+                        } else { alert("Error: " + data.error); btnText.textContent = "Continue"; submitBtn.disabled = false; }
+                    })
+                    .catch(err => { alert("Network error. Server connection down."); btnText.textContent = "Continue"; submitBtn.disabled = false; });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
